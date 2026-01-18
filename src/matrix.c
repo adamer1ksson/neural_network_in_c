@@ -153,6 +153,8 @@ void f_matrix_transpose(f_matrix *a) {
             a->data[j*cols + i] = temp;
         }
     }
+    a->rows = cols;
+    a->cols = rows;
     return;
 }
 

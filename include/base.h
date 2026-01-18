@@ -18,3 +18,6 @@ typedef double      f64;
 #ifndef PI
 #define PI 3.14159265358979323846
 #endif
+
+#define MAX(a, b) ( (a) > (b) ? (a) : (b))
+#define MIN(a, b) ( (a) > (b) ? (b) : (a))
