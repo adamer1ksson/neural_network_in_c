@@ -1,4 +1,4 @@
-# Neural Network library in C99
+# Neural Network library in C
 
 ### TODO:
 - Implement loading csv file to matrix for training data.
