@@ -28,7 +28,7 @@ void f_matrix_copy(f_matrix *out, f_matrix *a) {
 void f_matrix_add(f_matrix *out, f_matrix *a, f_matrix *b) {
     if (a->rows != b->rows || a->rows != out->rows || b->rows != out->rows ||
         a->cols != b->cols || a->cols != out->cols || b->cols != out->cols) {
-        fprintf(stderr, "Adding matricies of different dimensions not allowed");        
+        fprintf(stderr, "Adding matricies of different dimensions not allowed.\n");        
         return;
     }
     u64 rows = out->rows;
@@ -44,7 +44,7 @@ void f_matrix_add(f_matrix *out, f_matrix *a, f_matrix *b) {
 void f_matrix_sub(f_matrix *out, f_matrix *a, f_matrix *b) {
     if (a->rows != b->rows || a->rows != out->rows || b->rows != out->rows ||
         a->cols != b->cols || a->cols != out->cols || b->cols != out->cols) {
-        fprintf(stderr, "Subtracting matricies of different dimensions not allowed");        
+        fprintf(stderr, "Subtracting matricies of different dimensions not allowed.\n");        
         return;
     }
     u64 rows = out->rows;
@@ -71,7 +71,7 @@ void f_matrix_scale(f_matrix *out, f32 c) {
 void f_matrix_mult(f_matrix *out, f_matrix *a, f_matrix *b, bool a_transpose, bool b_transpose) {
     if (a_transpose && b_transpose) {
         if (a->rows != b->cols || a->cols != out->rows || b->rows != out->cols) { 
-            fprintf(stderr, "Non matching dimensions of matricies in multiplication");
+            fprintf(stderr, "Non matching dimensions of matricies in multiplication.\n");
             return;
         }
         u64 orows = a->cols;
@@ -89,7 +89,7 @@ void f_matrix_mult(f_matrix *out, f_matrix *a, f_matrix *b, bool a_transpose, bo
         return;
     } else if (a_transpose && !b_transpose) {
         if (a->rows != b->rows || a->cols != out->rows || b->cols != out->cols) { 
-            fprintf(stderr, "Non matching dimensions of matricies in multiplication");
+            fprintf(stderr, "Non matching dimensions of matricies in multiplication.\n");
             return;
         }
         u64 orows = a->cols;
@@ -107,7 +107,7 @@ void f_matrix_mult(f_matrix *out, f_matrix *a, f_matrix *b, bool a_transpose, bo
         return;
     } else if (!a_transpose && b_transpose) {
         if (a->cols != b->cols || a->rows != out->rows || b->rows != out->cols) { 
-            fprintf(stderr, "Non matching dimensions of matricies in multiplication");
+            fprintf(stderr, "Non matching dimensions of matricies in multiplication.\n");
             return;
         }
         u64 orows = a->rows;
@@ -125,7 +125,7 @@ void f_matrix_mult(f_matrix *out, f_matrix *a, f_matrix *b, bool a_transpose, bo
         return;
     }
     if (a->cols != b->rows || a->rows != out->rows || b->cols != out->cols) { 
-        fprintf(stderr, "Non matching dimensions of matricies in multiplication");
+        fprintf(stderr, "Non matching dimensions of matricies in multiplication.\n");
         return;
     }
     u64 orows = a->rows;
@@ -139,6 +139,62 @@ void f_matrix_mult(f_matrix *out, f_matrix *a, f_matrix *b, bool a_transpose, bo
                     b->data[k*ocols + j];
             }
         }    
+    }    
+    return;
+}
+
+void f_matrix_hadamard_prod(f_matrix *out, f_matrix *a, f_matrix *b, bool a_transpose, bool b_transpose) {
+    if (a_transpose && b_transpose) {
+        if (a->cols != b->cols || a->rows != b->rows || b->rows != out->cols || b->cols != out->rows ) { 
+            fprintf(stderr, "Non matching dimensions of matricies in hadamard product.\n");
+            return;
+        }
+        u64 rows = a->rows;
+        u64 cols = a->cols;
+        for (u64 i=0; i < rows; i++) {
+            for (u64 j=0; j < cols; j++) {
+                out->data[j*rows + i] = a->data[i*cols + j] * b->data[i*cols + j];
+            }
+        }    
+        return;
+    } else if (!a_transpose && b_transpose) {
+        if (a->cols != b->rows || a->rows != b->cols || b->cols != out->rows || b->rows != out->cols) { 
+            fprintf(stderr, "Non matching dimensions of matricies in hadamard product.\n");
+            return;
+        }
+        u64 rows = a->rows;
+        u64 cols = a->cols;
+        for (u64 i=0; i < rows; i++) {
+            for (u64 j=0; j < cols; j++) {
+                out->data[i*cols + j] = a->data[i*cols + j] * b->data[j*rows + i];
+            }
+        }    
+        return;
+    } else if (a_transpose && !b_transpose) {
+        if (a->cols != b->rows || a->rows != b->cols || b->cols != out->rows || b->rows != out->cols) { 
+            fprintf(stderr, "Non matching dimensions of matricies in hadamard product.\n");
+            return;
+        }
+        u64 rows = a->rows;
+        u64 cols = a->cols;
+        for (u64 i=0; i < rows; i++) {
+            for (u64 j=0; j < cols; j++) {
+                out->data[i*cols + j] = a->data[j*rows + i] * b->data[i*cols + j];
+            }
+        }    
+        return;
+    }
+    //base case
+    if (a->cols != b->cols || a->rows != b->rows || b->rows != out->rows || b->cols != out->cols) { 
+        fprintf(stderr, "Non matching dimensions of matricies in hadamard product.\n");
+        return;
+    }
+    u64 rows = a->rows;
+    u64 cols = a->cols;
+    for (u64 i=0; i < rows; i++) {
+        for (u64 j=0; j < cols; j++) {
+            out->data[i*cols + j] = a->data[i*cols + j] * b->data[i*cols + j];
+        }
     }    
     return;
 }
@@ -157,6 +213,7 @@ void f_matrix_transpose(f_matrix *a) {
     a->cols = rows;
     return;
 }
+
 
 void f_matrix_transpose_copy(f_matrix *out, f_matrix *a) {
     if (out->rows != a->cols || out->cols != a->rows) {
@@ -177,7 +234,7 @@ void f_matrix_apply_func(f_func function, f_matrix* a) {
     u64 rows = a->rows;
     u64 cols = a->cols;
     for (u64 i = 0; i < rows; i++) {
-        for (u64 j = i; j < cols; j++) {
+        for (u64 j = 0; j < cols; j++) {
             a->data[i*cols + j] = function(a->data[i*cols + j]);
         }
     }
